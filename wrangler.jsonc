@@ -11,7 +11,8 @@
     "binding": "ASSETS",
     "run_worker_first": ["/health", "/health/*", "/api/*"]
   },
-  "vars": { "APP_ENV": "production" },
+  "vars": { "APP_ENV": "production", "MARKET_SCAN_ENABLED": "true" },
+  "secrets": { "required": ["APCA_API_KEY_ID", "APCA_API_SECRET_KEY"] },
   "triggers": { "crons": ["*/5 * * * *"] },
   "observability": { "enabled": true, "head_sampling_rate": 1 },
   "d1_databases": [{

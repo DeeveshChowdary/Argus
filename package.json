@@ -1,6 +1,6 @@
 {
   "name": "argus-foundation",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
     "test": "node --test --test-timeout=30000",
-    "check": "node --check src/index.js && node --check src/worker.js && node --check public/app.js && node --check scripts/smoke.mjs",
+    "check": "node --check src/index.js && node --check src/worker.js && node --check src/alpaca.js && node --check src/universe.js && node --check src/features.js && node --check src/scanner.js && node --check src/log.js && node --check public/app.js && node --check scripts/smoke.mjs",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy:check": "wrangler deploy --dry-run",

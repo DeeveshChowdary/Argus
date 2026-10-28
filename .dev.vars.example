@@ -1,4 +1,7 @@
-# Milestone 0 requires no secrets. Keep this file free of real credentials.
-# Future server-only credentials belong in ignored .dev.vars locally,
-# and in `npx wrangler secret put NAME` for deployment.
-# Do not add broker or LLM credentials until their milestone.
+# Server-only Alpaca PAPER credentials. This template contains no real values.
+# Copy to ignored .dev.vars for local live scanning and fill values privately.
+# Offline tests do not need credentials.
+APCA_API_KEY_ID=
+APCA_API_SECRET_KEY=
+# Production: use Cloudflare Secret bindings with these exact names.
+# Never add live broker credentials or commit .dev.vars.

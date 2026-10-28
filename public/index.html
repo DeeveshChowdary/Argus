@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Argus paper research system — foundation operations dashboard">
+  <meta name="description" content="Argus paper research system — stock scanner and operations dashboard">
   <title>Argus · Operations</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
@@ -15,13 +15,13 @@
       <a class="brand" href="/" aria-label="Argus home"><span class="brand-mark">◉</span> ARGUS<span class="brand-dot">.</span></a>
       <p class="eyebrow">RESEARCH TERMINAL</p>
       <nav aria-label="Main"><a class="nav active" href="#overview"><span>▦</span> Overview <span class="nav-count">01</span></a></nav>
-      <div class="roadmap"><p class="eyebrow">COMING NEXT</p><p>Market scanner <span>M1</span></p><p>Catalyst intelligence <span>M2</span></p><p>Social signals <span>M3</span></p><p>Paper execution <span>M6</span></p></div>
-      <div class="sidebar-foot"><span class="indicator"></span> PAPER ENVIRONMENT<br><small>Execution disabled · Foundation v0.1</small></div>
+      <div class="roadmap"><p class="eyebrow">COMING NEXT</p><p>Catalyst intelligence <span>M2</span></p><p>Social signals <span>M3</span></p><p>Paper execution <span>M6</span></p></div>
+      <div class="sidebar-foot"><span class="indicator"></span> PAPER ENVIRONMENT<br><small>Execution disabled · Scanner v0.2</small></div>
     </aside>
     <main id="overview">
       <header><div class="breadcrumb">Workspace <span>/</span> Operations</div><div class="mode"><span class="indicator"></span> PAPER ONLY</div></header>
-      <section class="title-row"><div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>Eyes on the system.</h1><p class="subtitle">The foundation for a measured market edge.</p></div><button id="refresh" type="button">↻ <span>Refresh status</span></button></section>
-      <div class="notice"><span class="notice-symbol">◎</span><div><strong>Foundation mode</strong><p>Infrastructure monitoring is active. Market scanning and trading are not connected.</p></div><span class="milestone">MILESTONE 00</span></div>
+      <section class="title-row"><div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>Eyes on the market.</h1><p class="subtitle">The foundation for a measured market edge.</p></div><button id="refresh" type="button">↻ <span>Refresh status</span></button></section>
+      <div class="notice"><span class="notice-symbol">◎</span><div><strong>Live scan · no trades</strong><p>Market observations are ranked for research. Order execution is disabled.</p></div><span class="milestone">MILESTONE 01</span></div>
       <div id="connection" class="connection" role="status" aria-live="polite">Connecting to system health…</div>
       <section class="metrics" aria-label="Core health">
         <article class="metric"><span class="label">SYSTEM STATUS</span><strong id="system-status">Connecting</strong><span id="system-note" class="metric-note">Checking services</span></article>
@@ -29,9 +29,16 @@
         <article class="metric"><span class="label">LAST HEARTBEAT</span><strong id="heartbeat">—</strong><span id="heartbeat-note" class="metric-note">Every five minutes · UTC</span></article>
         <article class="metric"><span class="label">PLANNED PAPER CAPITAL</span><strong>$5,000<span class="currency"> USD</span></strong><span class="metric-note">Target allocation · no broker balance</span></article>
       </section>
+      <section class="panel market-panel" id="market-watch" aria-label="Market scanner">
+        <div class="panel-heading"><div><p class="eyebrow">MARKET ACTIVITY</p><h2>Candidate watchlist</h2></div><span class="pill">SCAN ONLY</span></div>
+        <div class="market-summary"><div><span class="label">SCANNER</span><strong id="scanner-status">Connecting</strong></div><div><span class="label">TRADABLE UNIVERSE</span><strong id="universe-count">—</strong></div><div><span class="label">MARKET SESSION</span><strong id="market-session">—</strong></div><div><span class="label">FRESH CANDIDATES</span><strong id="fresh-count">—</strong></div></div>
+        <div class="market-toolbar"><p id="market-note">Waiting for market data connection.</p><label for="candidate-filter" class="sr-only">Filter candidates</label><select id="candidate-filter"><option value="all">All candidates</option><option value="fresh">Fresh observations</option><option value="extended">Extended-hours activity</option><option value="penny">Penny stocks (&lt;$5)</option></select></div>
+        <div class="table-scroll candidate-scroll" tabindex="0" role="region" aria-label="Ranked candidates, scroll horizontally for all metrics"><table><thead><tr><th>SYMBOL / DATA AGE</th><th>PRICE</th><th>MOVE</th><th>GAP</th><th>IEX VOLUME</th><th>DAILY RANGE</th><th>SPREAD</th><th>ACTIVITY SCORE</th></tr></thead><tbody id="candidates"><tr><td colspan="8" class="empty">No candidate observations loaded.</td></tr></tbody></table></div>
+        <div class="panel-footer" id="coverage-note">IEX is one exchange. Missing observations do not mean no market activity.</div>
+      </section>
       <div class="content-grid">
-        <section class="panel"><div class="panel-heading"><div><p class="eyebrow">OPERATIONS</p><h2>Scheduled activity</h2></div><span class="pill">5 MIN INTERVAL</span></div><div class="table-scroll"><table><thead><tr><th>JOB / SCHEDULED TIME</th><th>STATUS</th><th class="align-right">DURATION</th></tr></thead><tbody id="runs"><tr><td colspan="3" class="empty">Waiting for heartbeat records.</td></tr></tbody></table></div><div class="panel-footer">Foundation heartbeat verifies D1 writes. It does not scan markets.</div></section>
-        <section class="panel"><div class="panel-heading"><div><p class="eyebrow">DATA PIPELINE</p><h2>Source connections</h2></div><span class="tiny-label">0 / 5</span></div><div class="sources"><div><span>Market data<small>Alpaca · Milestone 1</small></span><span class="source-state">Not connected</span></div><div><span>SEC filings<small>EDGAR · Milestone 2</small></span><span class="source-state">Not connected</span></div><div><span>Social signals<small>Reddit · Milestone 3</small></span><span class="source-state">Not connected</span></div><div><span>LLM analysis<small>Filtered events · Milestone 5</small></span><span class="source-state">Not connected</span></div><div><span>Paper broker<small>Alpaca · Milestone 6</small></span><span class="source-state">Not connected</span></div></div></section>
+        <section class="panel"><div class="panel-heading"><div><p class="eyebrow">OPERATIONS</p><h2>Scheduled activity</h2></div><span class="pill">5 MIN INTERVAL</span></div><div class="table-scroll"><table><thead><tr><th>JOB / SCHEDULED TIME</th><th>STATUS</th><th class="align-right">DURATION</th></tr></thead><tbody id="runs"><tr><td colspan="3" class="empty">Waiting for heartbeat records.</td></tr></tbody></table></div><div class="panel-footer">Foundation heartbeat verifies D1 writes. Market scanning runs separately on the same schedule.</div></section>
+        <section class="panel"><div class="panel-heading"><div><p class="eyebrow">DATA PIPELINE</p><h2>Source connections</h2></div><span class="tiny-label" id="source-count">0 / 5</span></div><div class="sources"><div><span>Market data<small>Alpaca · IEX feed</small></span><span class="source-state" id="market-source">Not connected</span></div><div><span>SEC filings<small>EDGAR · Milestone 2</small></span><span class="source-state">Not connected</span></div><div><span>Social signals<small>Reddit · Milestone 3</small></span><span class="source-state">Not connected</span></div><div><span>LLM analysis<small>Filtered events · Milestone 5</small></span><span class="source-state">Not connected</span></div><div><span>Paper broker<small>Alpaca · Milestone 6</small></span><span class="source-state">Not connected</span></div></div></section>
       </div>
       <section class="panel error-panel"><div class="panel-heading"><div><p class="eyebrow">OBSERVABILITY</p><h2>Recent system errors</h2></div><span class="tiny-label">SANITIZED LOG</span></div><div id="errors" class="error-content">Waiting for system status.</div></section>
       <footer><span>ARGUS <span class="muted">/</span> Built to observe. Designed to learn.</span><span id="updated">No successful status response yet</span></footer>

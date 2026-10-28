@@ -1,3 +1,5 @@
+import { log } from './log.js';
+import { readMarketStatus, runMarketScan } from './scanner.js';
 const JOB = 'foundation_heartbeat';
 const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 export const STALE_AFTER_MS = 12 * 60 * 1000;
@@ -7,15 +9,6 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'no-referrer',
   'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
 };
-
-// Never pass request objects, environment bindings, arbitrary errors, or payloads here.
-export function log(level, event, fields = {}) {
-  const record = { level, event };
-  for (const key of ['request_id', 'run_id', 'code', 'duration_ms']) {
-    if (fields[key] !== undefined) record[key] = fields[key];
-  }
-  console[level === 'error' ? 'error' : 'log'](JSON.stringify(record));
-}
 
 function json(data, status = 200, head = false, extraHeaders = {}) {
   return new Response(head ? null : JSON.stringify(data), {
@@ -43,19 +36,22 @@ async function readStatus(env) {
     env.DB.prepare('SELECT * FROM job_runs ORDER BY scheduled_at DESC LIMIT 15'),
     env.DB.prepare('SELECT occurred_at, component, code, run_id FROM system_errors ORDER BY occurred_at DESC LIMIT 10'),
   ]);
-  if (schema.results[0]?.version !== 1) throw new Error('SCHEMA_MISMATCH');
+  if (schema.results[0]?.version !== 2) throw new Error('SCHEMA_MISMATCH');
   const lastRun = latest.results[0] ?? null;
   const lastSuccess = success.results[0] ?? null;
   const scheduler = schedulerHealth(lastRun, lastSuccess);
+  const market = await readMarketStatus(env);
+  const marketOK = ['disabled', 'healthy', 'idle'].includes(market.status);
   return {
-    service: 'argus', version: '0.1.0', milestone: 0,
-    status: scheduler.status === 'healthy' ? 'healthy' : 'degraded',
+    service: 'argus', version: '0.2.0', milestone: 1,
+    status: scheduler.status === 'healthy' && marketOK ? 'healthy' : 'degraded',
     timestamp: new Date().toISOString(),
     operating_mode: 'live_scan_no_trade', paper_only: true, trading_enabled: false,
     planned_paper_capital_usd: 5000,
-    database: { status: 'connected', schema_version: 1 },
+    database: { status: 'connected', schema_version: 2 },
     scheduler: { ...scheduler, cron: '*/5 * * * *', stale_after_seconds: STALE_AFTER_MS / 1000, last_run: lastRun, last_success: lastSuccess },
-    integrations: { market: 'not_connected', sec: 'not_connected', reddit: 'not_connected', llm: 'not_connected', broker: 'not_connected' },
+    market,
+    integrations: { market: market.status, sec: 'not_connected', reddit: 'not_connected', llm: 'not_connected', broker: 'not_connected' },
     recent_runs: runs.results,
     recent_errors: errors.results,
   };
@@ -67,7 +63,7 @@ export async function runHeartbeat(controller, env) {
   const runId = `${JOB}:${scheduledAt}`;
   try {
     const schema = await env.DB.prepare('SELECT version FROM schema_metadata ORDER BY version DESC LIMIT 1').first();
-    if (schema?.version !== 1) throw new Error('SCHEMA_MISMATCH');
+    if (schema?.version !== 2) throw new Error('SCHEMA_MISMATCH');
     const finished = new Date().toISOString();
     const cutoff = new Date(started - RETENTION_MS).toISOString();
     // D1 batch is transactional: a success record means all housekeeping writes passed.
@@ -109,11 +105,12 @@ export default {
     }
     const path = new URL(request.url).pathname;
     if (path === '/health/live') return json({ service: 'argus', status: 'alive', paper_only: true, trading_enabled: false }, 200, head);
-    if (path === '/health' || path === '/api/status') {
+    if (path === '/health' || path === '/api/status' || path === '/api/market') {
       const requestId = crypto.randomUUID();
       try {
         const status = await readStatus(env);
-        return json(status, status.status === 'healthy' ? 200 : 503, head, { 'X-Request-ID': requestId });
+        const payload = path === '/api/market' ? status.market : status;
+        return json(payload, status.status === 'healthy' ? 200 : 503, head, { 'X-Request-ID': requestId });
       } catch {
         log('error', 'status_failed', { request_id: requestId, code: 'DATABASE_UNAVAILABLE' });
         return json({ service: 'argus', status: 'unhealthy', timestamp: new Date().toISOString(),
@@ -131,5 +128,6 @@ export default {
   },
   async scheduled(controller, env) {
     await runHeartbeat(controller, env);
+    await runMarketScan(controller, env);
   },
 };

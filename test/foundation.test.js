@@ -1,6 +1,6 @@
 import test, { before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { Miniflare, Log, LogLevel } from 'miniflare';
 import worker, { runHeartbeat, schedulerHealth, STALE_AFTER_MS } from '../src/worker.js';
@@ -18,8 +18,10 @@ before(async () => {
     serviceBindings: { ASSETS: async () => new Response('asset') },
   });
   db = await mf.getD1Database('DB');
-  const sql = await readFile(new URL('../migrations/0001_foundation.sql', import.meta.url), 'utf8');
-  await db.batch(sql.split(';').filter((s) => s.trim()).map((s) => db.prepare(s)));
+  for (const name of (await readdir(new URL('../migrations/', import.meta.url))).sort()) {
+    const sql = await readFile(new URL(`../migrations/${name}`, import.meta.url), 'utf8');
+    await db.batch(sql.split(';').filter((s) => s.trim()).map((s) => db.prepare(s)));
+  }
 });
 after(async () => { if (mf) await mf.dispose(); });
 beforeEach(async () => {
@@ -36,11 +38,11 @@ test('liveness and readiness distinguish an uninitialized scheduler', async () =
   const response = await request('/health');
   assert.equal(response.status, 503);
   const status = await response.json();
-  assert.equal(status.database.schema_version, 1);
+  assert.equal(status.database.schema_version, 2);
   assert.equal(status.scheduler.status, 'never_run');
   assert.equal(status.trading_enabled, false);
   assert.equal(status.paper_only, true);
-  assert.equal(status.integrations.market, 'not_connected');
+  assert.equal(status.integrations.market, 'disabled');
 });
 
 test('actual Workers scheduled handler writes D1 and makes readiness healthy', async () => {
