@@ -1,0 +1,4 @@
+# Milestone 0 requires no secrets. Keep this file free of real credentials.
+# Future server-only credentials belong in ignored .dev.vars locally,
+# and in `npx wrangler secret put NAME` for deployment.
+# Do not add broker or LLM credentials until their milestone.
