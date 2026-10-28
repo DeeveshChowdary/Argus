@@ -6,7 +6,7 @@ An incremental U.S. stock-scanning and **paper-only** research system. Current s
 
 **Health:** https://argus-foundation.readingroom.workers.dev/health
 
-Read [current state](docs/CURRENT_STATE.md) before starting work. See the [execution plan](docs/EXECUTION_PLAN.md), [architecture](docs/ARCHITECTURE.md), [deployment runbook](docs/DEPLOYMENT.md), [test matrix](docs/TEST_MATRIX.md), and [original request](docs/PROJECT_BRIEF.md).
+Local development instructions and planning/state files are kept outside version control. See below for application setup and verification.
 
 ```sh
 npm ci
